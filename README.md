@@ -1,4 +1,166 @@
-# Getting Started with Create React App
+# MediaPipe BlazePose GHUM Detection with React
+
+This project implements real-time pose detection using MediaPipe BlazePose GHUM (WebGPU) in a React application. It includes model loading, inference at target FPS, joint mapping, angle computation, smoothing filters, and a stream API for other modules.
+
+## Features
+
+- ✅ **Model Loading**: Automatic initialization of MediaPipe BlazePose GHUM model with WebGPU support
+- ✅ **Target FPS Control**: Configurable frame rate for inference (default: 30 FPS)
+- ✅ **Joint Mapping**: Complete mapping of 33 body landmarks to named joints
+- ✅ **Angle Computation**: Real-time calculation of joint angles (elbows, knees, shoulders, hips)
+- ✅ **Smoothing Filters**: Multiple smoothing algorithms (EMA, One Euro Filter, Kalman Filter)
+- ✅ **Stream API**: Subscribe to pose detection stream from any module
+
+## Installation
+
+```bash
+npm install
+```
+
+## Usage
+
+### Basic Usage in React Component
+
+```jsx
+import { usePoseDetection } from './hooks/usePoseDetection';
+
+function MyComponent() {
+  const {
+    isInitialized,
+    isRunning,
+    poseData,
+    initialize,
+    start,
+    stop,
+  } = usePoseDetection({
+    targetFPS: 30,
+    smoothingAlpha: 0.5,
+  });
+
+  const handleStart = async () => {
+    await initialize();
+    const video = document.getElementById('video');
+    await start(video);
+  };
+
+  return (
+    <div>
+      {poseData && (
+        <div>
+          <p>Left Elbow Angle: {poseData.angles?.leftElbow?.toFixed(1)}°</p>
+          <p>Right Knee Angle: {poseData.angles?.rightKnee?.toFixed(1)}°</p>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### Using the Pose Stream in Other Modules
+
+```javascript
+import { subscribeToPoseStream, getCurrentPoseData } from './modules/poseStream';
+
+// Subscribe to pose updates
+const unsubscribe = subscribeToPoseStream((poseData) => {
+  console.log('Pose detected:', poseData);
+  console.log('Joints:', poseData.joints);
+  console.log('Angles:', poseData.angles);
+});
+
+// Get current pose data
+const currentPose = getCurrentPoseData();
+
+// Unsubscribe when done
+unsubscribe();
+```
+
+### Available Joints
+
+The system provides access to 33 body landmarks:
+
+- **Face**: NOSE, LEFT_EYE, RIGHT_EYE, LEFT_EAR, RIGHT_EAR, etc.
+- **Upper Body**: LEFT_SHOULDER, RIGHT_SHOULDER, LEFT_ELBOW, RIGHT_ELBOW, LEFT_WRIST, RIGHT_WRIST
+- **Lower Body**: LEFT_HIP, RIGHT_HIP, LEFT_KNEE, RIGHT_KNEE, LEFT_ANKLE, RIGHT_ANKLE
+
+### Computed Angles
+
+The system automatically calculates:
+- Elbow angles (left/right)
+- Knee angles (left/right)
+- Shoulder angles (left/right)
+- Hip angles (left/right)
+
+### Smoothing Filters
+
+Three smoothing algorithms are available:
+- **Exponential Moving Average (EMA)**: Simple and fast
+- **One Euro Filter**: Adaptive smoothing based on velocity
+- **Kalman Filter**: Advanced filtering for noisy data
+
+## Project Structure
+
+```
+src/
+├── services/
+│   └── poseDetectionService.js    # Core pose detection service
+├── hooks/
+│   └── usePoseDetection.js        # React hook for pose detection
+├── utils/
+│   ├── jointMapping.js            # Joint name/index mapping
+│   ├── angleComputation.js        # Angle calculation utilities
+│   └── smoothingFilters.js       # Smoothing filter implementations
+├── modules/
+│   └── poseStream.js              # Stream API for other modules
+└── examples/
+    └── exampleModule.js           # Example usage patterns
+```
+
+## Configuration Options
+
+### usePoseDetection Hook Options
+
+- `targetFPS` (number): Target frames per second (default: 30)
+- `smoothingAlpha` (number): Smoothing factor 0-1 (default: 0.5)
+- `modelPath` (string): Path to MediaPipe WASM files
+- `modelAssetPath` (string): Path to pose model file
+
+## API Reference
+
+### PoseDetectionService
+
+- `initialize()`: Load the pose model
+- `start(videoElement)`: Start detection on video element
+- `stop()`: Stop detection
+- `subscribe(callback)`: Subscribe to pose updates
+- `setTargetFPS(fps)`: Update target FPS
+- `setSmoothingAlpha(alpha)`: Update smoothing factor
+
+### Pose Data Structure
+
+```javascript
+{
+  landmarks: Array,        // Raw MediaPipe landmarks
+  joints: Object,          // Named joint positions {x, y, z, visibility}
+  angles: Object,         // Computed joint angles
+  timestamp: number,      // Detection timestamp
+  confidence: number      // Detection confidence
+}
+```
+
+## Browser Requirements
+
+- Chrome/Edge 90+ (for WebGPU support)
+- Firefox 89+ (experimental WebGPU support)
+- Safari 16.4+ (experimental WebGPU support)
+
+## Troubleshooting
+
+1. **WebGPU not available**: Ensure you're using a supported browser and have WebGPU enabled
+2. **Model loading fails**: Check network connection and CDN availability
+3. **Low FPS**: Reduce target FPS or use a lighter model variant
+
+## Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 

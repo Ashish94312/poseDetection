@@ -1,0 +1,116 @@
+{
+  "landmarks": [
+    {
+      "x": 0.512,
+      "y": 0.234,
+      "z": -0.123,
+      "visibility": 0.98
+    }
+  ],
+  "joints": {
+    "NOSE": {
+      "x": 0.512,
+      "y": 0.234,
+      "z": -0.123,
+      "visibility": 0.98
+    },
+    "LEFT_SHOULDER": {
+      "x": 0.456,
+      "y": 0.345,
+      "z": -0.089,
+      "visibility": 0.95
+    },
+    "RIGHT_SHOULDER": {
+      "x": 0.568,
+      "y": 0.345,
+      "z": -0.091,
+      "visibility": 0.96
+    },
+    "LEFT_ELBOW": {
+      "x": 0.412,
+      "y": 0.456,
+      "z": -0.067,
+      "visibility": 0.92
+    },
+    "RIGHT_ELBOW": {
+      "x": 0.612,
+      "y": 0.456,
+      "z": -0.069,
+      "visibility": 0.93
+    },
+    "LEFT_WRIST": {
+      "x": 0.378,
+      "y": 0.567,
+      "z": -0.045,
+      "visibility": 0.89
+    },
+    "RIGHT_WRIST": {
+      "x": 0.646,
+      "y": 0.567,
+      "z": -0.047,
+      "visibility": 0.90
+    },
+    "LEFT_HIP": {
+      "x": 0.478,
+      "y": 0.678,
+      "z": -0.123,
+      "visibility": 0.94
+    },
+    "RIGHT_HIP": {
+      "x": 0.546,
+      "y": 0.678,
+      "z": -0.125,
+      "visibility": 0.95
+    },
+    "LEFT_KNEE": {
+      "x": 0.489,
+      "y": 0.789,
+      "z": -0.156,
+      "visibility": 0.91
+    },
+    "RIGHT_KNEE": {
+      "x": 0.535,
+      "y": 0.789,
+      "z": -0.158,
+      "visibility": 0.92
+    },
+    "LEFT_ANKLE": {
+      "x": 0.500,
+      "y": 0.900,
+      "z": -0.189,
+      "visibility": 0.88
+    },
+    "RIGHT_ANKLE": {
+      "x": 0.524,
+      "y": 0.900,
+      "z": -0.191,
+      "visibility": 0.89
+    }
+  },
+  "angles": {
+    "jointAngles": {
+      "leftElbow": 145.3,
+      "rightElbow": 142.7,
+      "leftKnee": 168.2,
+      "rightKnee": 169.1,
+      "leftShoulder": 175.4,
+      "rightShoulder": 176.8,
+      "leftHip": 172.3,
+      "rightHip": 173.5
+    },
+    "segmentOrientations": {
+      "leftUpperArm": 25.3,
+      "rightUpperArm": -22.1,
+      "leftForearm": 15.7,
+      "rightForearm": -18.9,
+      "leftThigh": 5.2,
+      "rightThigh": 3.8,
+      "leftShank": -2.1,
+      "rightShank": -1.5,
+      "trunk": 8.4
+    }
+  },
+  "timestamp": 1234567890.123,
+  "confidence": 0.94
+}
+

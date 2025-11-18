@@ -1,0 +1,237 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Pose Detection Data Schema",
+  "description": "Schema for pose detection data from MediaPipe BlazePose GHUM",
+  "type": "object",
+  "required": ["landmarks", "joints", "angles", "timestamp"],
+  "properties": {
+    "landmarks": {
+      "type": "array",
+      "description": "Raw MediaPipe landmarks array (33 landmarks)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "number",
+            "description": "Normalized x coordinate (0-1)"
+          },
+          "y": {
+            "type": "number",
+            "description": "Normalized y coordinate (0-1)"
+          },
+          "z": {
+            "type": "number",
+            "description": "Normalized z coordinate (depth)"
+          },
+          "visibility": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Landmark visibility score (0-1)"
+          }
+        },
+        "required": ["x", "y", "z", "visibility"]
+      },
+      "minItems": 33,
+      "maxItems": 33
+    },
+    "joints": {
+      "type": "object",
+      "description": "Named joint positions extracted from landmarks",
+      "properties": {
+        "NOSE": { "$ref": "#/definitions/joint" },
+        "LEFT_EYE_INNER": { "$ref": "#/definitions/joint" },
+        "LEFT_EYE": { "$ref": "#/definitions/joint" },
+        "LEFT_EYE_OUTER": { "$ref": "#/definitions/joint" },
+        "RIGHT_EYE_INNER": { "$ref": "#/definitions/joint" },
+        "RIGHT_EYE": { "$ref": "#/definitions/joint" },
+        "RIGHT_EYE_OUTER": { "$ref": "#/definitions/joint" },
+        "LEFT_EAR": { "$ref": "#/definitions/joint" },
+        "RIGHT_EAR": { "$ref": "#/definitions/joint" },
+        "MOUTH_LEFT": { "$ref": "#/definitions/joint" },
+        "MOUTH_RIGHT": { "$ref": "#/definitions/joint" },
+        "LEFT_SHOULDER": { "$ref": "#/definitions/joint" },
+        "RIGHT_SHOULDER": { "$ref": "#/definitions/joint" },
+        "LEFT_ELBOW": { "$ref": "#/definitions/joint" },
+        "RIGHT_ELBOW": { "$ref": "#/definitions/joint" },
+        "LEFT_WRIST": { "$ref": "#/definitions/joint" },
+        "RIGHT_WRIST": { "$ref": "#/definitions/joint" },
+        "LEFT_PINKY": { "$ref": "#/definitions/joint" },
+        "RIGHT_PINKY": { "$ref": "#/definitions/joint" },
+        "LEFT_INDEX": { "$ref": "#/definitions/joint" },
+        "RIGHT_INDEX": { "$ref": "#/definitions/joint" },
+        "LEFT_THUMB": { "$ref": "#/definitions/joint" },
+        "RIGHT_THUMB": { "$ref": "#/definitions/joint" },
+        "LEFT_HIP": { "$ref": "#/definitions/joint" },
+        "RIGHT_HIP": { "$ref": "#/definitions/joint" },
+        "LEFT_KNEE": { "$ref": "#/definitions/joint" },
+        "RIGHT_KNEE": { "$ref": "#/definitions/joint" },
+        "LEFT_ANKLE": { "$ref": "#/definitions/joint" },
+        "RIGHT_ANKLE": { "$ref": "#/definitions/joint" },
+        "LEFT_HEEL": { "$ref": "#/definitions/joint" },
+        "RIGHT_HEEL": { "$ref": "#/definitions/joint" },
+        "LEFT_FOOT_INDEX": { "$ref": "#/definitions/joint" },
+        "RIGHT_FOOT_INDEX": { "$ref": "#/definitions/joint" }
+      }
+    },
+    "angles": {
+      "type": "object",
+      "description": "Computed angles using two systems: goniometric and functional",
+      "properties": {
+        "jointAngles": {
+          "type": "object",
+          "description": "System 1: True Joint Angles (Goniometric) - Range: 0° to 180°",
+          "properties": {
+            "leftElbow": {
+              "type": ["number", "null"],
+              "minimum": 0,
+              "maximum": 180,
+              "description": "Left elbow joint angle in degrees"
+            },
+            "rightElbow": {
+              "type": ["number", "null"],
+              "minimum": 0,
+              "maximum": 180,
+              "description": "Right elbow joint angle in degrees"
+            },
+            "leftKnee": {
+              "type": ["number", "null"],
+              "minimum": 0,
+              "maximum": 180,
+              "description": "Left knee joint angle in degrees"
+            },
+            "rightKnee": {
+              "type": ["number", "null"],
+              "minimum": 0,
+              "maximum": 180,
+              "description": "Right knee joint angle in degrees"
+            },
+            "leftShoulder": {
+              "type": ["number", "null"],
+              "minimum": 0,
+              "maximum": 180,
+              "description": "Left shoulder joint angle in degrees"
+            },
+            "rightShoulder": {
+              "type": ["number", "null"],
+              "minimum": 0,
+              "maximum": 180,
+              "description": "Right shoulder joint angle in degrees"
+            },
+            "leftHip": {
+              "type": ["number", "null"],
+              "minimum": 0,
+              "maximum": 180,
+              "description": "Left hip joint angle in degrees"
+            },
+            "rightHip": {
+              "type": ["number", "null"],
+              "minimum": 0,
+              "maximum": 180,
+              "description": "Right hip joint angle in degrees"
+            }
+          }
+        },
+        "segmentOrientations": {
+          "type": "object",
+          "description": "System 2: Segment Orientations (Functional) - Range: +90° to -90°",
+          "properties": {
+            "leftUpperArm": {
+              "type": ["number", "null"],
+              "minimum": -90,
+              "maximum": 90,
+              "description": "Left upper arm orientation relative to vertical"
+            },
+            "rightUpperArm": {
+              "type": ["number", "null"],
+              "minimum": -90,
+              "maximum": 90,
+              "description": "Right upper arm orientation relative to vertical"
+            },
+            "leftForearm": {
+              "type": ["number", "null"],
+              "minimum": -90,
+              "maximum": 90,
+              "description": "Left forearm orientation relative to vertical"
+            },
+            "rightForearm": {
+              "type": ["number", "null"],
+              "minimum": -90,
+              "maximum": 90,
+              "description": "Right forearm orientation relative to vertical"
+            },
+            "leftThigh": {
+              "type": ["number", "null"],
+              "minimum": -90,
+              "maximum": 90,
+              "description": "Left thigh orientation relative to vertical"
+            },
+            "rightThigh": {
+              "type": ["number", "null"],
+              "minimum": -90,
+              "maximum": 90,
+              "description": "Right thigh orientation relative to vertical"
+            },
+            "leftShank": {
+              "type": ["number", "null"],
+              "minimum": -90,
+              "maximum": 90,
+              "description": "Left shank (lower leg) orientation relative to vertical"
+            },
+            "rightShank": {
+              "type": ["number", "null"],
+              "minimum": -90,
+              "maximum": 90,
+              "description": "Right shank (lower leg) orientation relative to vertical"
+            },
+            "trunk": {
+              "type": ["number", "null"],
+              "minimum": -90,
+              "maximum": 90,
+              "description": "Trunk orientation relative to vertical"
+            }
+          }
+        }
+      },
+      "required": ["jointAngles", "segmentOrientations"]
+    },
+    "timestamp": {
+      "type": "number",
+      "description": "Timestamp in milliseconds (performance.now())"
+    },
+    "confidence": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Overall pose detection confidence score (0-1), null if not available"
+    }
+  },
+  "definitions": {
+    "joint": {
+      "type": ["object", "null"],
+      "description": "Joint position with coordinates and visibility",
+      "properties": {
+        "x": {
+          "type": "number",
+          "description": "Normalized x coordinate (0-1)"
+        },
+        "y": {
+          "type": "number",
+          "description": "Normalized y coordinate (0-1)"
+        },
+        "z": {
+          "type": "number",
+          "description": "Normalized z coordinate (depth)"
+        },
+        "visibility": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Joint visibility score (0-1)"
+        }
+      },
+      "required": ["x", "y", "z", "visibility"]
+    }
+  }
+}
+

@@ -1,0 +1,184 @@
+.dashboard {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.metric-card,
+.jump-status-card,
+.stats-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 24px;
+  color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.metric-card:hover,
+.jump-status-card:hover,
+.stats-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.metric-card h3,
+.jump-status-card h3,
+.stats-card h3 {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.9;
+}
+
+.metric-value {
+  font-size: 36px;
+  font-weight: 700;
+  margin: 8px 0;
+}
+
+.metric-value.positive {
+  color: #4ade80;
+}
+
+.metric-value.negative {
+  color: #f87171;
+}
+
+.jump-status-card.grounded {
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+}
+
+.jump-status-card.jumping {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+.jump-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.jump-badge {
+  font-size: 24px;
+  font-weight: 700;
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.jump-badge.active {
+  background: rgba(255, 255, 255, 0.3);
+  animation: glow 1s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+  }
+}
+
+.jump-phase {
+  font-size: 16px;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.jump-height {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 14px;
+}
+
+.max-height {
+  margin-top: 8px;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.airtime {
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.part-a-info {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.confidence {
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.stats-card {
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+}
+
+.stats-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-item:last-child {
+  border-bottom: none;
+}
+
+.stat-label {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.status-message {
+  text-align: center;
+  padding: 40px;
+  font-size: 18px;
+  color: #666;
+  background: #f3f4f6;
+  border-radius: 12px;
+}
+
