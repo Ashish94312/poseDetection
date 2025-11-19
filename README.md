@@ -1,6 +1,6 @@
-# MediaPipe BlazePose GHUM Detection with React
+# pose_detection - MediaPipe BlazePose GHUM Detection with React
 
-This project implements real-time pose detection using MediaPipe BlazePose GHUM (WebGPU) in a React application. It includes model loading, inference at target FPS, joint mapping, angle computation, smoothing filters, and a stream API for other modules.
+This project (`pose_detection`) implements real-time pose detection using MediaPipe BlazePose GHUM (WebGPU) in a React application. It includes model loading, inference at target FPS, joint mapping, angle computation, smoothing filters, and a stream API that sends JSON data to other modules for integration.
 
 ## Features
 
@@ -58,22 +58,270 @@ function MyComponent() {
 
 ### Using the Pose Stream in Other Modules
 
+The `pose_detection` module provides a stream API that sends pose data as JSON objects to subscribing modules. This allows other modules to receive real-time pose detection data without directly coupling to the detection service.
+
+#### Basic Integration
+
 ```javascript
 import { subscribeToPoseStream, getCurrentPoseData } from './modules/poseStream';
 
-// Subscribe to pose updates
+// Subscribe to pose updates - receives JSON data on each detection
 const unsubscribe = subscribeToPoseStream((poseData) => {
+  // poseData is a JSON object containing:
+  // - landmarks: Array of 33 raw MediaPipe landmarks
+  // - joints: Object with named joint positions
+  // - angles: Object with computed joint angles
+  // - timestamp: Detection timestamp
+  // - confidence: Detection confidence score
+  
   console.log('Pose detected:', poseData);
   console.log('Joints:', poseData.joints);
   console.log('Angles:', poseData.angles);
+  
+  // Process the JSON data as needed
+  processPoseData(poseData);
 });
 
-// Get current pose data
+// Get current pose data (returns JSON object or null)
 const currentPose = getCurrentPoseData();
 
 // Unsubscribe when done
 unsubscribe();
 ```
+
+#### JSON Data Format
+
+The pose stream sends data in a standardized JSON format. Each detection event contains:
+
+```json
+{
+  "landmarks": [
+    {
+      "x": 0.512,
+      "y": 0.234,
+      "z": -0.123,
+      "visibility": 0.98
+    }
+    // ... 33 landmarks total
+  ],
+  "joints": {
+    "NOSE": { "x": 0.512, "y": 0.234, "z": -0.123, "visibility": 0.98 },
+    "LEFT_SHOULDER": { "x": 0.456, "y": 0.345, "z": -0.089, "visibility": 0.95 },
+    "RIGHT_SHOULDER": { "x": 0.568, "y": 0.345, "z": -0.091, "visibility": 0.96 },
+    "LEFT_ELBOW": { "x": 0.412, "y": 0.456, "z": -0.067, "visibility": 0.92 },
+    // ... all 33 joints
+  },
+  "angles": {
+    "jointAngles": {
+      "leftElbow": 145.3,
+      "rightElbow": 142.7,
+      "leftKnee": 168.2,
+      "rightKnee": 169.1,
+      "leftShoulder": 175.4,
+      "rightShoulder": 176.8,
+      "leftHip": 172.3,
+      "rightHip": 173.5
+    },
+    "segmentOrientations": {
+      "leftUpperArm": 25.3,
+      "rightUpperArm": -22.1,
+      "leftForearm": 15.7,
+      "rightForearm": -18.9,
+      "leftThigh": 5.2,
+      "rightThigh": 3.8,
+      "leftShank": -2.1,
+      "rightShank": -1.5,
+      "trunk": 8.4
+    }
+  },
+  "timestamp": 1234567890.123,
+  "confidence": 0.94
+}
+```
+
+**Schema Validation**: The complete JSON schema is defined in `pose-data-schema.json`. Use this schema to validate incoming data or generate TypeScript types.
+
+**Example Data**: See `pose-data-example.json` for a complete example of the JSON structure.
+
+#### Integration Patterns
+
+##### Pattern 1: Simple Subscriber
+
+```javascript
+import { subscribeToPoseStream } from './modules/poseStream';
+
+// Simple function that processes JSON pose data
+function setupPoseProcessor() {
+  const unsubscribe = subscribeToPoseStream((poseData) => {
+    // Access joint angles
+    const leftKneeAngle = poseData.angles.jointAngles.leftKnee;
+    const rightKneeAngle = poseData.angles.jointAngles.rightKnee;
+    
+    // Access joint positions
+    const leftHip = poseData.joints.LEFT_HIP;
+    const rightHip = poseData.joints.RIGHT_HIP;
+    
+    // Your processing logic here
+    if (leftKneeAngle && leftKneeAngle < 90) {
+      console.log('Deep squat detected!');
+    }
+  });
+  
+  return unsubscribe;
+}
+```
+
+##### Pattern 2: Class-Based Integration
+
+```javascript
+import { subscribeToPoseStream, isPoseStreamActive } from './modules/poseStream';
+
+export class MyPoseModule {
+  constructor() {
+    this.unsubscribe = null;
+    this.poseHistory = [];
+  }
+  
+  start() {
+    // Subscribe to receive JSON pose data
+    this.unsubscribe = subscribeToPoseStream((poseData) => {
+      // Store JSON data
+      this.poseHistory.push(poseData);
+      
+      // Process the JSON object
+      this.processPoseData(poseData);
+    });
+  }
+  
+  processPoseData(poseData) {
+    // Extract data from JSON object
+    const { joints, angles, timestamp } = poseData;
+    
+    // Your module logic here
+    const kneeAngles = angles.jointAngles;
+    if (kneeAngles.leftKnee && kneeAngles.rightKnee) {
+      const avgKneeAngle = (kneeAngles.leftKnee + kneeAngles.rightKnee) / 2;
+      this.onKneeAngleUpdate(avgKneeAngle);
+    }
+  }
+  
+  stop() {
+    if (this.unsubscribe) {
+      this.unsubscribe();
+      this.unsubscribe = null;
+    }
+  }
+}
+```
+
+##### Pattern 3: React Component Integration
+
+```javascript
+import { useEffect, useState } from 'react';
+import { subscribeToPoseStream, getCurrentPoseData } from './modules/poseStream';
+
+function MyPoseComponent() {
+  const [poseData, setPoseData] = useState(null);
+  
+  useEffect(() => {
+    // Subscribe to pose stream - receives JSON objects
+    const unsubscribe = subscribeToPoseStream((data) => {
+      // Update state with JSON data
+      setPoseData(data);
+    });
+    
+    // Cleanup on unmount
+    return () => unsubscribe();
+  }, []);
+  
+  if (!poseData) return <div>No pose data</div>;
+  
+  // Access JSON data
+  const leftKneeAngle = poseData.angles.jointAngles.leftKnee;
+  
+  return <div>Left Knee Angle: {leftKneeAngle?.toFixed(1)}°</div>;
+}
+```
+
+##### Pattern 4: Sending JSON to External Services
+
+```javascript
+import { subscribeToPoseStream } from './modules/poseStream';
+
+// Send pose data as JSON to external API
+function setupAPIIntegration(apiEndpoint) {
+  const unsubscribe = subscribeToPoseStream((poseData) => {
+    // Serialize to JSON string
+    const jsonString = JSON.stringify(poseData);
+    
+    // Send to external service
+    fetch(apiEndpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: jsonString
+    }).catch(error => {
+      console.error('Failed to send pose data:', error);
+    });
+  });
+  
+  return unsubscribe;
+}
+```
+
+#### Initializing the Stream
+
+Before subscribing, ensure the pose detection service is initialized and the stream is active:
+
+```javascript
+import { initializePoseStream } from './modules/poseStream';
+import { PoseDetectionService } from './services/poseDetectionService';
+
+// Initialize pose detection service
+const poseService = new PoseDetectionService({
+  targetFPS: 60,
+  smoothingAlpha: 0.5
+});
+
+await poseService.initialize();
+
+// Initialize the stream with the service
+initializePoseStream(poseService);
+
+// Now other modules can subscribe
+const unsubscribe = subscribeToPoseStream((poseData) => {
+  // Receive JSON pose data
+});
+```
+
+#### Data Flow
+
+```
+pose_detection Module
+    ↓
+PoseDetectionService (detects pose)
+    ↓
+poseStream Module (converts to JSON)
+    ↓
+Subscribers (receive JSON objects)
+    ↓
+Your Module (processes JSON data)
+```
+
+#### TypeScript Support
+
+For TypeScript projects, import the type definitions:
+
+```typescript
+import type { PoseData } from './pose-data-types';
+import { subscribeToPoseStream } from './modules/poseStream';
+
+const unsubscribe = subscribeToPoseStream((poseData: PoseData) => {
+  // Type-safe access to JSON data
+  const leftKnee = poseData.angles.jointAngles.leftKnee;
+});
+```
+
+See `pose-data-types.ts` for complete TypeScript definitions.
 
 ### Available Joints
 
@@ -98,22 +346,62 @@ Three smoothing algorithms are available:
 - **One Euro Filter**: Adaptive smoothing based on velocity
 - **Kalman Filter**: Advanced filtering for noisy data
 
+## Integration with Other Modules
+
+The `pose_detection` module is designed to be integrated with other modules or applications. It provides a standardized JSON interface for pose data exchange.
+
+### Integration Overview
+
+1. **JSON Data Format**: All pose data is sent as JSON objects following the schema defined in `pose-data-schema.json`
+2. **Stream API**: Subscribe to real-time pose updates via `subscribeToPoseStream()`
+3. **Schema Files**: Use `pose-data-schema.json` for validation and `pose-data-types.ts` for TypeScript support
+4. **Example Data**: Reference `pose-data-example.json` for complete data structure examples
+
+### Quick Integration Steps
+
+1. **Import the stream module**:
+   ```javascript
+   import { subscribeToPoseStream } from 'pose_detection/src/modules/poseStream';
+   ```
+
+2. **Subscribe to receive JSON data**:
+   ```javascript
+   const unsubscribe = subscribeToPoseStream((poseData) => {
+     // poseData is a JSON object
+     console.log(JSON.stringify(poseData, null, 2));
+   });
+   ```
+
+3. **Process the JSON data** in your module as needed
+
+4. **Unsubscribe** when done:
+   ```javascript
+   unsubscribe();
+   ```
+
+For detailed integration examples, see the [Integration Patterns](#integration-patterns) section above.
+
 ## Project Structure
 
 ```
-src/
-├── services/
-│   └── poseDetectionService.js    # Core pose detection service
-├── hooks/
-│   └── usePoseDetection.js        # React hook for pose detection
-├── utils/
-│   ├── jointMapping.js            # Joint name/index mapping
-│   ├── angleComputation.js        # Angle calculation utilities
-│   └── smoothingFilters.js       # Smoothing filter implementations
-├── modules/
-│   └── poseStream.js              # Stream API for other modules
-└── examples/
-    └── exampleModule.js           # Example usage patterns
+pose_detection/
+├── src/
+│   ├── services/
+│   │   └── poseDetectionService.js    # Core pose detection service
+│   ├── hooks/
+│   │   └── usePoseDetection.js        # React hook for pose detection
+│   ├── utils/
+│   │   ├── jointMapping.js            # Joint name/index mapping
+│   │   ├── angleComputation.js        # Angle calculation utilities
+│   │   └── smoothingFilters.js       # Smoothing filter implementations
+│   ├── modules/
+│   │   └── poseStream.js              # Stream API for other modules
+│   └── examples/
+│       └── exampleModule.js           # Example usage patterns
+├── pose-data-schema.json              # JSON schema for validation
+├── pose-data-example.json             # Example JSON data
+├── pose-data-types.ts                 # TypeScript type definitions
+└── API_DOCUMENTATION.md               # Complete API reference
 ```
 
 ## Configuration Options
@@ -136,17 +424,21 @@ src/
 - `setTargetFPS(fps)`: Update target FPS
 - `setSmoothingAlpha(alpha)`: Update smoothing factor
 
-### Pose Data Structure
+### Pose Data Structure (JSON Format)
+
+The pose data is sent as a JSON object with the following structure:
 
 ```javascript
 {
-  landmarks: Array,        // Raw MediaPipe landmarks
+  landmarks: Array,        // Raw MediaPipe landmarks (33 items)
   joints: Object,          // Named joint positions {x, y, z, visibility}
-  angles: Object,         // Computed joint angles
-  timestamp: number,      // Detection timestamp
-  confidence: number      // Detection confidence
+  angles: Object,         // Computed joint angles (jointAngles + segmentOrientations)
+  timestamp: number,      // Detection timestamp (milliseconds)
+  confidence: number      // Detection confidence (0-1, or null)
 }
 ```
+
+**Note**: This data structure is serialized as JSON when sent through the stream API. See `pose-data-schema.json` for the complete JSON schema and `pose-data-example.json` for a full example.
 
 ```
 +-----------------------------------------------------------+
