@@ -228,7 +228,7 @@ src/
 
 ## System Architecture Diagram
 
-<img src="Screenshot 2025-11-19 at 12.25.50 PM.png" alt="System Architecture Diagram" width="100%">
+![System Architecture Diagram](system-architecture.png)
 
 
 ## Browser Requirements
