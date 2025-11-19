@@ -148,6 +148,89 @@ src/
 }
 ```
 
+```
++-----------------------------------------------------------+
+|                       React Component                     |
+|-----------------------------------------------------------|
+| - Renders UI                                              |
+| - Provides <video> element                                |
+| - Calls: start(), stop()                                  |
+| - Receives: poseData, error, isRunning                    |
++---------------------------+-------------------------------+
+                            |
+                            v
++-----------------------------------------------------------+
+|                usePoseDetection (React Hook)              |
+|-----------------------------------------------------------|
+| - Creates PoseDetectionService instance                   |
+| - Manages React state:                                    |
+|     isInitialized                                         |
+|     isRunning                                             |
+|     poseData                                              |
+|     error                                                 |
+| - Exposes: start(), stop(), initialize(), setFPS(), etc. |
+| - Updates UI via setPoseData()                            |
++---------------------------+-------------------------------+
+                            |
+                            v
++-----------------------------------------------------------+
+|                 PoseDetectionService (Engine)             |
+|-----------------------------------------------------------|
+| Initialization:                                           |
+|   - Load WASM + model via MediaPipe                      |
+|   - Configure WebGPU delegate                             |
+|   - Prepare runtime                                       |
+|                                                           |
+| Runtime:                                                  |
+|   start(video)                                            |
+|     -> processFrame() loop                                |
+|                                                           |
+| processFrame():                                           |
+|   - Throttle to targetFPS                                 |
+|   - Run poseLandmarker.detectForVideo()                   |
+|   - Extract joints                                        |
+|   - Smooth joints (PoseSmoother)                          |
+|   - Compute angles                                        |
+|   - Smooth angles (AngleSmoother)                         |
+|   - Build poseData packet                                 |
+|   - notifySubscribers()                                   |
+|   - onPoseDetected() -> sends to hook                     |
+|                                                           |
+| API:                                                      |
+|   start(), stop(), initialize()                           |
+|   subscribe(callback)                                     |
+|   setTargetFPS(), setSmoothingAlpha()                     |
+|   dispose()                                               |
++---------------------------+-------------------------------+
+                            |
+                            v
++-----------------------------------------------------------+
+|                       MediaPipe Model                     |
+|-----------------------------------------------------------|
+| Pose Landmarker (WebGPU / WASM):                          |
+|   - Returns 33 landmarks                                  |
+|   - Tracking + timestamps                                 |
+|   - Segmentation/confidence (optional)                    |
++---------------------------+-------------------------------+
+                            |
+                            v
++-----------------------------------------------------------+
+|                      Subscribers (Optional)               |
+|-----------------------------------------------------------|
+| - Rep counter                                             |
+| - Posture analysis                                        |
+| - Skeleton overlay renderer                               |
+| - Data logger / analytics                                 |
+| Receive poseData via notifySubscribers()                  |
++-----------------------------------------------------------+
+
+```
+
+## System Architecture Diagram
+
+<img src="Screenshot 2025-11-19 at 12.25.50 PM.png" alt="System Architecture Diagram" width="100%">
+
+
 ## Browser Requirements
 
 - Chrome/Edge 90+ (for WebGPU support)

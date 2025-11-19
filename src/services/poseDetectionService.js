@@ -23,6 +23,12 @@ export class PoseDetectionService {
     this.lastFrameTime = 0;
     this.frameInterval = 1000 / this.targetFPS;
     
+    // FPS tracking
+    this.frameCount = 0;
+    this.fpsStartTime = 0;
+    this.fpsUpdateInterval = 1000; // Update FPS every second
+    this.currentFPS = 0;
+    
     // Smoothing filters
     this.poseSmoother = new PoseSmoother(this.smoothingAlpha);
     this.angleSmoother = new AngleSmoother(this.smoothingAlpha);
@@ -89,6 +95,8 @@ export class PoseDetectionService {
     this.videoElement = videoElement;
     this.isRunning = true;
     this.lastFrameTime = performance.now();
+    this.fpsStartTime = performance.now();
+    this.frameCount = 0;
     this.processFrame();
   }
 
@@ -101,6 +109,10 @@ export class PoseDetectionService {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
     }
+    // Reset FPS tracking
+    this.frameCount = 0;
+    this.fpsStartTime = 0;
+    this.currentFPS = 0;
   }
 
   /**
@@ -121,6 +133,9 @@ export class PoseDetectionService {
           this.videoElement,
           startTimeMs
         );
+
+        // Increment frame count for FPS calculation
+        this.frameCount++;
 
         if (results.landmarks && results.landmarks.length > 0) {
           const landmarks = results.landmarks[0];
@@ -156,6 +171,15 @@ export class PoseDetectionService {
           if (this.onPoseDetected) {
             this.onPoseDetected(poseData);
           }
+        }
+
+        // Calculate and print FPS periodically
+        const timeSinceFpsStart = currentTime - this.fpsStartTime;
+        if (timeSinceFpsStart >= this.fpsUpdateInterval) {
+          this.currentFPS = (this.frameCount / timeSinceFpsStart) * 1000;
+          console.log(`FPS: ${this.currentFPS.toFixed(2)} (Target: ${this.targetFPS})`);
+          this.frameCount = 0;
+          this.fpsStartTime = currentTime;
         }
       } catch (error) {
         console.error('Error processing frame:', error);
