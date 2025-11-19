@@ -5,7 +5,7 @@ This project implements real-time pose detection using MediaPipe BlazePose GHUM 
 ## Features
 
 - ✅ **Model Loading**: Automatic initialization of MediaPipe BlazePose GHUM model with WebGPU support
-- ✅ **Target FPS Control**: Configurable frame rate for inference (default: 30 FPS)
+- ✅ **Target FPS Control**: Configurable frame rate for inference (default: 60 FPS)
 - ✅ **Joint Mapping**: Complete mapping of 33 body landmarks to named joints
 - ✅ **Angle Computation**: Real-time calculation of joint angles (elbows, knees, shoulders, hips)
 - ✅ **Smoothing Filters**: Multiple smoothing algorithms (EMA, One Euro Filter, Kalman Filter)
@@ -33,7 +33,7 @@ function MyComponent() {
     start,
     stop,
   } = usePoseDetection({
-    targetFPS: 30,
+    targetFPS: 60,
     smoothingAlpha: 0.5,
   });
 

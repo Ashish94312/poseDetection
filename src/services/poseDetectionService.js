@@ -11,7 +11,8 @@ export class PoseDetectionService {
   constructor(options = {}) {
     this.targetFPS = options.targetFPS || 30;
     this.smoothingAlpha = options.smoothingAlpha || 0.5;
-    this.modelPath = options.modelPath || 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.9/wasm';
+    // this.modelPath = options.modelPath || 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.9/wasm';
+    this.modelPath = options.modelPath || 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm';
     this.modelAssetPath = options.modelAssetPath || 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_heavy/float16/1/pose_landmarker_heavy.task';
     
     this.poseLandmarker = null;
